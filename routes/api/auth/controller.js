@@ -101,36 +101,40 @@ exports.login = (request, response) => {
 };
 
 exports.check = (request, response) => {
-  const token = request.headers['x-access-token'] || request.query.token;
-
-  if (!token) {
-    return response.status(403).json({
-      success: false,
-      message: 'not logged in',
-    });
-  }
-
-  const promise = new Promise((resolve, reject) => {
-    jwt.verify(token, request.app.get('jwt-secret'), (error, decoded) => {
-      if (error) reject(error);
-
-      resolve(decoded);
-    });
+  response.json({
+    success: true,
+    info: request.decoded,
   });
+  // const token = request.headers['x-access-token'] || request.query.token;
 
-  const respond = (token) => {
-    response.json({
-      success: true,
-      info: token,
-    });
-  };
+  // if (!token) {
+  //   return response.status(403).json({
+  //     success: false,
+  //     message: 'not logged in',
+  //   });
+  // }
 
-  const onError = (error) => {
-    response.status(403).json({
-      success: false,
-      message: error.message,
-    });
-  };
+  // const promise = new Promise((resolve, reject) => {
+  //   jwt.verify(token, request.app.get('jwt-secret'), (error, decoded) => {
+  //     if (error) reject(error);
 
-  promise.then(respond).catch(onError);
+  //     resolve(decoded);
+  //   });
+  // });
+
+  // const respond = (token) => {
+  //   response.json({
+  //     success: true,
+  //     info: token,
+  //   });
+  // };
+
+  // const onError = (error) => {
+  //   response.status(403).json({
+  //     success: false,
+  //     message: error.message,
+  //   });
+  // };
+
+  // promise.then(respond).catch(onError);
 };
