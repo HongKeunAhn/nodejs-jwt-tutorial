@@ -48,5 +48,54 @@ exports.register = async (request, response) => {
 };
 
 exports.login = (request, response) => {
-  response.send('login api is working');
+  const { username, password } = request.body;
+  const secret = request.app.get('jwt-secret');
+
+  const check = (user) => {
+    if (!user) {
+      throw new Error('login failed');
+    } else {
+      if (user.verify(password)) {
+        const promise = new Promise((resolve, reject) => {
+          jwt.sign(
+            {
+              _id: user._id,
+              username: user.username,
+              admin: user.admin,
+            },
+            secret,
+            {
+              expiresIn: '7d',
+              issuer: 'keuni.com',
+              subject: 'userInfo',
+            },
+            (error, token) => {
+              if (error) reject(error);
+
+              resolve(token);
+            }
+          );
+        });
+
+        return promise;
+      } else {
+        throw new Error('login failed');
+      }
+    }
+  };
+
+  const respond = (token) => {
+    response.json({
+      message: 'logged in successfully',
+      token,
+    });
+  };
+
+  const onError = (error) => {
+    response.status(403).json({
+      message: error.message,
+    });
+  };
+
+  User.findOneByUsername(username).then(check).then(respond).catch(onError);
 };
